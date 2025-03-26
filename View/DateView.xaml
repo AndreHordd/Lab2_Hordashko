@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="Laboratory2.View.DateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Laboratory2.View"
+             mc:Ignorable="d" Height="416" Width="475">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height= "auto"></RowDefinition>
+            <RowDefinition Height= "auto"></RowDefinition>
+            <RowDefinition Height= "auto"></RowDefinition>
+            <RowDefinition Height= "auto"></RowDefinition>
+            <RowDefinition Height= "auto"></RowDefinition>
+            <RowDefinition Height= "auto"></RowDefinition>
+            <RowDefinition Height= "auto"></RowDefinition>
+
+        </Grid.RowDefinitions>
+        <TextBlock Name="TEnterBirthDay" Grid.Row="0" Margin="10,15,0,0" FontSize="16" Text="Введіть дату народження:"/>
+        <DatePicker x:Name="DPickDate" Grid.Row="1" Margin="10,10,10,0" FontSize="16" SelectedDate="{Binding SelectedDate, Mode=TwoWay}" ></DatePicker>
+        <Button Name="BButton" Grid.Row="2" Height="25" Width="100" Margin="0,10" Content="Розрахувати" Command="{Binding BCommand, UpdateSourceTrigger=PropertyChanged}"></Button>
+        <TextBlock Name="TAge" Grid.Row="3" Margin="10,10,0,0" FontSize="16" Text="{Binding AgeText}"></TextBlock>
+        <TextBlock Name="TWesternHoroscope" Grid.Row="4" Margin="10,10,0,0" FontSize="16" Text="{Binding WesternHoroscope}"></TextBlock>
+        <TextBlock Name="TChineseHoroscope" Grid.Row="5" Margin="10,10,0,0" FontSize="16" Text="{Binding ChineseHoroscope}"></TextBlock>
+        <TextBlock Name="TBirthDay" Grid.Row="6" Margin="10,10,0,0" FontSize="20" HorizontalAlignment="Center" Foreground="Green" Text="{Binding HappyBirthday}"></TextBlock>
+    </Grid>
+</UserControl>

@@ -1,136 +1,121 @@
-﻿/*using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Laboratory2.Model;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace Laboratory2.ViewModel
 {
-    public class DateViewModel : INotifyPropertyChanged
+    public class DateViewModel : ObservableObject
     {
-        private string _ageText;
-        private string _westernHoroscope;
-        private string _chineseHoroscope;
-        private string _happyBirthday;
-        private Person _user = new Person();
+        private string _name;
+        private string _surname;
+        private string _email;
+        private DateTime? _selectedDate;
+        private string _resultText;
+        private Person _person;
+
         public DateViewModel()
         {
-            DefaultText();
-            BCommand = new RelayCommand(UpdateDateInfo, CanExecute);
+            ResultText = "";
+            ProceedCommand = new RelayCommand(UpdateDateInfo, CanExecute);
+        }
 
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                SetProperty(ref _name, value);
+                ProceedCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        public string Surname
+        {
+            get => _surname;
+            set
+            {
+                SetProperty(ref _surname, value);
+                ProceedCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        public string Email
+        {
+            get => _email;
+            set
+            {
+                SetProperty(ref _email, value);
+                ProceedCommand.NotifyCanExecuteChanged();
+            }
         }
 
         public DateTime? SelectedDate
         {
-            get => _user.BirthDate;
+            get => _selectedDate;
             set
             {
-                if (_user.BirthDate != value)
-                {
-                    _user.BirthDate = value;
-                    UpdateCanExecute();
-                    OnPropertyChanged(nameof(SelectedDate));
-                }
+                SetProperty(ref _selectedDate, value);
+                ProceedCommand.NotifyCanExecuteChanged();
             }
         }
 
-        public string AgeText
+        public string ResultText
         {
-            get => _ageText;
-            set
-            {
-                _ageText = value;
-                OnPropertyChanged(nameof(AgeText));
-            }
+            get => _resultText;
+            set => SetProperty(ref _resultText, value);
         }
 
-        public string WesternHoroscope
-        {
-            get => _westernHoroscope;
-            set
-            {
-                _westernHoroscope = value;
-                OnPropertyChanged(nameof(WesternHoroscope));
-            }
-        }
-
-        public string ChineseHoroscope
-        {
-            get => _chineseHoroscope;
-            set
-            {
-                _chineseHoroscope = value;
-                OnPropertyChanged(nameof(ChineseHoroscope));
-            }
-        }
-
-        public string HappyBirthday
-        {
-            get => _happyBirthday;
-            set
-            {
-                _happyBirthday = value;
-                OnPropertyChanged(nameof(HappyBirthday));
-            }
-        }
-
-        public RelayCommand BCommand { get; }
-
-        public void DefaultText()
-        {
-            AgeText = "Ваш вік:";
-            WesternHoroscope = "Ваш знак західного гороскопу:";
-            ChineseHoroscope = "Ваш знак китайського гороскопу:";
-            HappyBirthday = "";
-        }
-        private void UpdateDateInfo()
-        {
-            DateTime birthDate = SelectedDate.Value;
-            DateTime today = DateTime.Today;
-
-            int age = today.Year - birthDate.Year;
-            if (birthDate > today.AddYears(-age))
-                age--;
-
-            if (age < 0 || age > 135)
-            {
-                MessageBox.Show("Неправильний вік. Перевірте дату народження.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-                DefaultText();
-                return;
-            }
-
-            AgeText = $"Ваш вік: {age}";
-            WesternHoroscope = $"Ваш знак західного гороскопу: {GetWesternZodiac(birthDate)}";
-            ChineseHoroscope = $"Ваш знак китайського гороскопу: {GetChineseZodiac(birthDate.Year)}";
-
-            if (birthDate.Month == today.Month && birthDate.Day == today.Day)
-                HappyBirthday = "З днем народження!";
-            else
-                HappyBirthday = "";
-        }
+        public RelayCommand ProceedCommand { get; }
 
         private bool CanExecute()
         {
-            return SelectedDate.HasValue;
+            return !string.IsNullOrWhiteSpace(Name) &&
+                   !string.IsNullOrWhiteSpace(Surname) &&
+                   !string.IsNullOrWhiteSpace(Email) &&
+                   SelectedDate.HasValue;
         }
 
-        private void UpdateCanExecute()
+        private async void UpdateDateInfo()
         {
-            BCommand.NotifyCanExecuteChanged();
+            if (!SelectedDate.HasValue)
+            {
+                MessageBox.Show("Введіть дату народження", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            DateTime selectedDate = SelectedDate.Value;
+            int age = GetAge(selectedDate);
+            if (age < 0 || age > 135)
+            {
+                MessageBox.Show("Неправильний вік. Перевірте дату народження.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            await Task.Delay(1000);
+
+            _person = new Person(Name, Surname, Email, selectedDate);
+
+            ResultText = $"Ім'я: {_person.Name}\n" +
+                         $"Прізвище: {_person.Surname}\n" +
+                         $"Електронна пошта: {_person.Email}\n" +
+                         $"Дата народження: {_person.DateOfBirth:d}\n" +
+                         $"Дорослий: {_person.IsAdult}\n" +
+                         $"Знак зодіаку (західний): {_person.SunSign}\n" +
+                         $"Китайський знак: {_person.ChineseSign}\n" +
+                         $"День народження: {_person.IsBirthday}";
         }
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
+        private int GetAge(DateTime birthDate)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            DateTime today = DateTime.Today;
+            int age = today.Year - birthDate.Year;
+            if (birthDate > today.AddYears(-age))
+                age--;
+            return age;
         }
-
     }
 }
-
-*/

@@ -87,25 +87,26 @@ namespace Laboratory2.ViewModel
             }
 
             DateTime selectedDate = SelectedDate.Value;
-            int age = GetAge(selectedDate);
-            if (age < 0 || age > 135)
+
+            try
             {
-                MessageBox.Show("Неправильний вік. Перевірте дату народження.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                _person = new Person(Name, Surname, Email, selectedDate);
+
+                await Task.Delay(1000);
+
+                ResultText = $"Ім'я: {_person.Name}\n" +
+                             $"Прізвище: {_person.Surname}\n" +
+                             $"Електронна пошта: {_person.Email}\n" +
+                             $"Дата народження: {_person.DateOfBirth:d}\n" +
+                             $"Дорослий: {_person.IsAdult}\n" +
+                             $"Знак зодіаку (західний): {_person.SunSign}\n" +
+                             $"Китайський знак: {_person.ChineseSign}\n" +
+                             $"День народження: {_person.IsBirthday}";
             }
-
-            await Task.Delay(1000);
-
-            _person = new Person(Name, Surname, Email, selectedDate);
-
-            ResultText = $"Ім'я: {_person.Name}\n" +
-                         $"Прізвище: {_person.Surname}\n" +
-                         $"Електронна пошта: {_person.Email}\n" +
-                         $"Дата народження: {_person.DateOfBirth:d}\n" +
-                         $"Дорослий: {_person.IsAdult}\n" +
-                         $"Знак зодіаку (західний): {_person.SunSign}\n" +
-                         $"Китайський знак: {_person.ChineseSign}\n" +
-                         $"День народження: {_person.IsBirthday}";
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
 

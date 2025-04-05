@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Laboratory2.ViewModel.Exceptions;
 
 namespace Laboratory2.Model
 {
@@ -54,6 +55,17 @@ namespace Laboratory2.Model
        
         public Person(string name, string surname, string email, DateTime dateOfBirth)
         {
+            if (dateOfBirth > DateTime.Today)
+                throw new FutureBirthDateException();
+
+            int age = GetAge(dateOfBirth);
+            if (age < 0 || age > 135)
+                throw new TooOldBirthDateException();
+
+            // Перевірка електронної пошти
+            if (!IsValidEmail(email))
+                throw new InvalidEmailException();
+
             _name = name;
             _surname = surname;
             _email = email;
@@ -106,6 +118,17 @@ namespace Laboratory2.Model
             if (birthDate > today.AddYears(-age))
                 age--;
             return age;
+        }
+
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+            int atIndex = email.IndexOf('@');
+            if (atIndex <= 0)
+                return false;
+            int dotIndex = email.IndexOf('.', atIndex);
+            return dotIndex > atIndex+1;
         }
 
         private static string GetWesternZodiac(DateTime date)
